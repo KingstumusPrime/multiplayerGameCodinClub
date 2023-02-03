@@ -1,0 +1,22 @@
+{
+  "rules": {
+  
+    ".read": "auth != null",
+    ".write": false,
+    "players": {
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "coins": {
+      ".write": "auth != null"
+    },
+    "boss": {
+      ".write":"auth != null"
+    },
+    "enemies": {
+      ".write":"auth != null"
+    }
+  }
+  
+}
