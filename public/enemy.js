@@ -119,7 +119,6 @@ function getClosestPlayer(players, id){
                     closet = players[p];
                 }
             })
-            console.log(closet);
             moveTo(closet, enemy);
         }
     }
@@ -130,13 +129,15 @@ function moveTo(player, enemy){
     if(Math.abs(Math.abs(enemy.y) - Math.abs(player.y)) > Math.abs(Math.abs(enemy.x) - Math.abs(player.x))){
         // y is greater should we move up or down
         if(enemy.y > player.y){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)]){
+            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)] && !isEnemyThere(enemy.x, enemy.y - 1)){
+                console.log(isEnemyThere(enemy.x , enemy.y - 1))
                 enemy.y -= 1;
             }else{
                 randomDir(enemy, player);
             }
         }else if(enemy.y < player.y){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] ){
+            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] && !isEnemyThere(enemy.x, enemy.y + 1)){
+                console.log(isEnemyThere(enemy.x, enemy.y + 1))
                 enemy.y += 1;
             }else{
                 randomDir(enemy, player);
@@ -145,14 +146,16 @@ function moveTo(player, enemy){
     } else {
         // x is greater should we move left or right
         if(enemy.x > player.x){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)]){
+            if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)] && !isEnemyThere(enemy.x - 1, enemy.y)){
+                console.log(isEnemyThere(enemy.x - 1, enemy.y))
                 enemy.x -= 1;
                 enemy.direction ="right"
             }else{
                 randomDir(enemy, player);
             }
         }else if(enemy.x < player.x) {
-            if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)]){
+            if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)] && !isEnemyThere(enemy.x + 1, enemy.y)){
+                console.log(isEnemyThere(enemy.x + 1, enemy.y))
                 enemy.x += 1;
                 enemy.direction = "left"
             }else{
@@ -160,13 +163,11 @@ function moveTo(player, enemy){
             }
         }
     }
-
     firebase.database().ref(`enemies/${enemy.id}`).update({
         x: enemy.x,
         y: enemy.y,
         direction: enemy.direction,
     })
-
     if(enemy.x== player.x && enemy.y == player.y){
         console.log("OOF")
         player.health -= 10;
@@ -201,18 +202,18 @@ function moveTo(player, enemy){
 
 // if you cannot move then choose random direction
 function randomDir(enemy, player) {
-    if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)]){
+    if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)] && enemy.y - 1 > mapData['minY']){
         enemy.y -= 1;
     }else{
-        if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)]){
+        if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)] && enemy.x - 1 > mapData['minX']){
             enemy.x -= 1;
             enemy.direction ="right"
         }else{
-            if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)]){
+            if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)] && enemy.x + 1 < mapData['maxX']){
                 enemy.x += 1;
                 enemy.direction ="left"
             }else{
-                if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] ){
+                if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] && enemy.y + 1 < mapData['maxY']){
                     enemy.y += 1;
                 }
             }
@@ -264,4 +265,16 @@ function moveArmy(){
     Object.keys(enemies).forEach((e) => {
         getClosestPlayer(players, e) 
     })
+}
+
+function isEnemyThere(x, y){
+    let val = false
+    Object.keys(enemies).forEach((key) => {
+        if(enemies[key]['x'] == x && enemies[key]['y'] == y){
+            console.log("THIS FUNCTION DOES STUFF")
+            val = true
+        }
+    })
+    console.log(val)
+    return val
 }

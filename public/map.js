@@ -110,11 +110,6 @@ function changeMap(){
             if(e.id != id){
                 id = e.id
                 modal.classList.remove("active")
-                playerDie()
-                playerRef.update({
-                    map: e.id,
-                    collide: true
-                })
                 upSwipe()
             }else{
                 
@@ -135,6 +130,11 @@ function upSwipe() {
         x.style.height = p + "px";
         requestAnimationFrame(upSwipe);
     }else{
+        playerReset()
+        playerRef.update({
+            map: id,
+            collide: true
+        })
         updateEnemies()
         document.querySelector(".game-container").style.backgroundImage = `url(https://multiplayer-game-160be.web.app/images/${id}.png)`
         setTimeout(downSwipe, 200)

@@ -142,7 +142,7 @@
                 collide: true,
                 states: [""],
                 weapon: "1" ,
-                map: "map"
+                map : "map"
             })
             
             playerRef.onDisconnect().remove()

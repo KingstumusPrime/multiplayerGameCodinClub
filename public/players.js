@@ -202,3 +202,12 @@ function playerDie(){
     Right.unbind()
     playerElements[playerId].style.opacity = 0
 }
+
+function playerReset(){
+    const {x, y} = getRandomSafeSpot()
+    playerRef.update({
+        direction: "right",
+        x,
+        y,
+    })
+}
