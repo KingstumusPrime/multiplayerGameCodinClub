@@ -38,13 +38,13 @@ closeModalBtn.addEventListener("click", () => {
     Lft.bind()
     Right.bind()
     chatInput.disabled = false
-    if(localStorage.getItem("logged") != "no"){
-        localStorage.setItem("logged", "no")
+    if(localStorage.getItem("loggedCastle") != "no"){
+        localStorage.setItem("loggedCastle", "no")
     }
 })  
 
 /// ***********************
-//  chat
+///  chat
 /// ***********************
 function loadMessages(){
 

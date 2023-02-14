@@ -84,7 +84,7 @@ function isSolid(x,y){
 
 var boss = false
 // Player colors in sprite order
-const playerColors = ["blue", "red", "orange", "yellow", "green", "purple"]
+const playerColors = ["blue", "red", "orange", "yellow", "green", "purple", "pink"]
 
 function sinWave(time, a, f){
     return Math.sin(time * Math.PI * 2/f)

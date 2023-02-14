@@ -125,6 +125,10 @@ button:active {
     background-position-y: -95px;
 }
 
+.Character[data-color="dark"] .Character_sprite{
+    background-position-y: -111px;
+}
+
 .Character_shadow {
     background: url(https://multiplayer-game-160be.web.app/images/shadow.png) no-repeat no-repeat;
 }
@@ -410,4 +414,9 @@ progress bar */
 
 .enemy {
     transition: transform 0.4s;
+}
+
+
+.alert {
+    color: red;
 }

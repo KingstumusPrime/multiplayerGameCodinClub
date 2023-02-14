@@ -65,7 +65,7 @@ function changeMap(){
 
         e.addEventListener("click", (emouse) => {
             if(e.id == "Castle"){
-                console.log("G")
+                hideCoins()
                 mapData = {
                     minX: 1,
                     maxX: 14,
@@ -80,6 +80,7 @@ function changeMap(){
                     }
                 }
             }else{
+                showCoins()
                 mapData = {
                     minX: 1,
                     maxX: 14,
@@ -105,8 +106,6 @@ function changeMap(){
                     }
                 }
             }
-
-            console.log(gameContainer.style)
             if(e.id != id){
                 id = e.id
                 modal.classList.remove("active")
@@ -137,6 +136,7 @@ function upSwipe() {
         })
         updateEnemies()
         document.querySelector(".game-container").style.backgroundImage = `url(https://multiplayer-game-160be.web.app/images/${id}.png)`
+        
         setTimeout(downSwipe, 200)
     }
 }

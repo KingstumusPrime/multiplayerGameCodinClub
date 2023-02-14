@@ -3,7 +3,7 @@ var coinElements = {}
 
 function attemptGrabCoin(x, y) {
     const key = getKeyString(x, y);
-    if (coins[key]) {
+    if (coins[key] && players[playerId].map == "map") {
         // Remove this key from data, then uptick Player's coin count
         firebase.database().ref(`coins/${key}`).remove();
         playerRef.update({
@@ -11,6 +11,21 @@ function attemptGrabCoin(x, y) {
         })
     }
 }
+
+// Hide coins
+function hideCoins(){
+    Object.keys(coinElements).forEach(element => {
+        coinElements[element].style.display = "none"
+    });
+}
+
+// Show coins
+function showCoins(){
+    Object.keys(coinElements).forEach(element => {
+        coinElements[element].style.display = "block"
+    });
+}
+
 
  // places coins around the map
  function placeCoin() {

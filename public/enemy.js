@@ -66,6 +66,10 @@ allEnemiesRef.on("child_added", (snapshot) => {
         }else {
             el.style.display = "block";
         }
+
+        if(enemyState.health <= 0) {
+            firebase.database().ref(`enemies/${enemyState.id}`).remove()
+        }
     })
 })
 
@@ -86,25 +90,6 @@ function spawnEnemy(id){
 }
 
 
-function enemyDie(){
-    // const {x, y} = getRandomSafeSpot()
-    // playerRef.update({
-    //     id: playerId,
-    //     direction: "right",
-    //     color: randomFromArray(playerColors),
-    //     x,
-    //     y,
-    //     coins: 0,
-    //     mana: 0,
-    //     health: 100,
-    //     collide: false
-    // })
-    // Dwn.unbind()
-    // Up.unbind()
-    // Lft.unbind()
-    // Right.unbind()
-    // playerElements[playerId].style.opacity = 0
-}
 
 function getClosestPlayer(players, id){
 
@@ -113,9 +98,9 @@ function getClosestPlayer(players, id){
         const validPlayers = weed(players, "map", enemy.map)
         if(validPlayers.length > 0){
             let closet = validPlayers[0];
+            const EnemyPos = Math.abs(enemy.x) + Math.abs(enemy.y)
             validPlayers.forEach((p) =>{
-                console.log(p)
-                if( Math.abs((Math.abs(enemy.x) + Math.abs(enemy.y)) - (Math.abs(p["x"]) + Math.abs(p["y"])))  < Math.abs((Math.abs(closet.x) + Math.abs(closet.y)) - (Math.abs(p["x"]) + Math.abs(p["y"])))){
+                if( Math.abs(EnemyPos - Math.abs(p["x"]) + Math.abs(p["y"]))  < EnemyPos - Math.abs(p["x"]) + Math.abs(p["y"]) ){
                     closet = players[p];
                 }
             })
@@ -126,78 +111,127 @@ function getClosestPlayer(players, id){
 
 function moveTo(player, enemy){
     // Farthest value is to the y
-    if(Math.abs(Math.abs(enemy.y) - Math.abs(player.y)) > Math.abs(Math.abs(enemy.x) - Math.abs(player.x))){
-        // y is greater should we move up or down
-        if(enemy.y > player.y){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)] && !isEnemyThere(enemy.x, enemy.y - 1)){
-                console.log(isEnemyThere(enemy.x , enemy.y - 1))
-                enemy.y -= 1;
-            }else{
-                randomDir(enemy, player);
+    if(player){
+        if(Math.abs(Math.abs(enemy.y) - Math.abs(player.y)) > Math.abs(Math.abs(enemy.x) - Math.abs(player.x))){
+            // y is greater should we move up or down
+            if(enemy.y > player.y){
+                if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y - 1)] && !isEnemyThere(enemy.x, enemy.y - 1)){
+                    console.log(isEnemyThere(enemy.x , enemy.y - 1))
+                    enemy.y -= 1;
+                }else{
+                    randomDir(enemy, player);
+                }
+            }else if(enemy.y < player.y){
+                if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] && !isEnemyThere(enemy.x, enemy.y + 1)){
+                    console.log(isEnemyThere(enemy.x, enemy.y + 1))
+                    enemy.y += 1;
+                }else{
+                    randomDir(enemy, player);
+                }
             }
-        }else if(enemy.y < player.y){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x, enemy.y + 1)] && !isEnemyThere(enemy.x, enemy.y + 1)){
-                console.log(isEnemyThere(enemy.x, enemy.y + 1))
-                enemy.y += 1;
-            }else{
-                randomDir(enemy, player);
+        } else {
+            // x is greater should we move left or right
+            if(enemy.x > player.x){
+                if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)] && !isEnemyThere(enemy.x - 1, enemy.y)){
+                    console.log(isEnemyThere(enemy.x - 1, enemy.y))
+                    enemy.x -= 1;
+                    enemy.direction ="right"
+                }else{
+                    randomDir(enemy, player);
+                }
+            }else if(enemy.x < player.x) {
+                if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)] && !isEnemyThere(enemy.x + 1, enemy.y)){
+                    console.log(isEnemyThere(enemy.x + 1, enemy.y))
+                    enemy.x += 1;
+                    enemy.direction = "left"
+                }else{
+                    randomDir(enemy, player);
+                }
             }
         }
-    } else {
-        // x is greater should we move left or right
-        if(enemy.x > player.x){
-            if(!mapData.blockedSpaces[getKeyString(enemy.x - 1, enemy.y)] && !isEnemyThere(enemy.x - 1, enemy.y)){
-                console.log(isEnemyThere(enemy.x - 1, enemy.y))
-                enemy.x -= 1;
-                enemy.direction ="right"
-            }else{
-                randomDir(enemy, player);
-            }
-        }else if(enemy.x < player.x) {
-            if(!mapData.blockedSpaces[getKeyString(enemy.x + 1, enemy.y)] && !isEnemyThere(enemy.x + 1, enemy.y)){
-                console.log(isEnemyThere(enemy.x + 1, enemy.y))
-                enemy.x += 1;
-                enemy.direction = "left"
-            }else{
-                randomDir(enemy, player);
-            }
-        }
-    }
-    firebase.database().ref(`enemies/${enemy.id}`).update({
-        x: enemy.x,
-        y: enemy.y,
-        direction: enemy.direction,
-    })
-    if(enemy.x== player.x && enemy.y == player.y){
-        console.log("OOF")
-        player.health -= 10;
-        if(player.id == playerId){
-            playerRef.update({
-                health: player.health
-            })
-        }
-        if(player.health <= 0){
-            const {x, y} = getRandomSafeSpot()
-            firebase.database().ref(`players/${player.id}`).update({
-                id: playerId,
-                direction: "right",
-                color: randomFromArray(playerColors),
-                x,
-                y,
-                coins: 0,
-                mana: 0,
-                health: 100,
-                collide: false,
-            })
+        firebase.database().ref(`enemies/${enemy.id}`).update({
+            x: enemy.x,
+            y: enemy.y,
+            direction: enemy.direction,
+        })
+        if(enemy.x== player.x && enemy.y == player.y){
+            console.log("OOF")
+            player.health -= 10;
             if(player.id == playerId){
-                Dwn.unbind()
-                Up.unbind()
-                Lft.unbind()
-                Right.unbind()
-                playerElements[playerId].style.opacity = 0
+                playerRef.update({
+                    health: player.health
+                })
+            }
+            if(player.health <= 0){
+                returnHome()
+                const {x, y} = getRandomSafeSpot()
+                firebase.database().ref(`players/${player.id}`).update({
+                    id: playerId,
+                    direction: "right",
+                    x,
+                    y,
+                    coins: 0,
+                    mana: 0,
+                    health: 100,
+                    collide: false,
+                    map: "map",
+                    collide: "true"
+                })
+                if(player.id == playerId){
+                    Dwn.unbind()
+                    Up.unbind()
+                    Lft.unbind()
+                    Right.unbind()
+                    playerElements[playerId].style.opacity = 0
+                    showCoins()
+                    updateEnemies()
+                    id = "map"
+                    document.querySelector(".game-container").style.backgroundImage = `url(https://multiplayer-game-160be.web.app/images/map.png)`
+                    mapData = {
+                        minX: 1,
+                        maxX: 14,
+                        minY: 4,
+                        maxY: 12,
+                        blockedSpaces: {
+                            "7x4": true,
+                            "1x11": true,
+                            "12x10": true,
+                            "4x7": true,
+                            "5x7": true,
+                            "6x7": true,
+                            "8x6": true,
+                            "9x6": true,
+                            "10x6": true,
+                            "7x9": true,
+                            "8x9": true,
+                            "9x9": true,
+                        },
+                        specialSpaces: {
+                            "3x4": "Coffe Shop",
+                            "11x4": "Pizza Shop"
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+
+function returnHome(){
+    // x.style.width = "100vw"
+    // if(p < window.innerHeight){
+    //     p += 18;
+    //     x.style.height = p + "px";
+    //     requestAnimationFrame(upSwipe);
+    // }else{
+    //     playerRef.update({
+    //         collide: true
+    //     })
+    //     updateEnemies()
+    //     document.querySelector(".game-container").style.backgroundImage = `url(https://multiplayer-game-160be.web.app/images/map.png)`
+    //     setTimeout(downSwipe, 200)
+    // }
 }
 
 // if you cannot move then choose random direction
@@ -262,9 +296,12 @@ function updateEnemies(){
 }
 
 function moveArmy(){
-    Object.keys(enemies).forEach((e) => {
-        getClosestPlayer(players, e) 
-    })
+    if(serverId == playerId){
+        Object.keys(enemies).forEach((e) => {
+            getClosestPlayer(players, e) 
+        })
+    }
+
 }
 
 function isEnemyThere(x, y){
@@ -277,4 +314,59 @@ function isEnemyThere(x, y){
     })
     console.log(val)
     return val
+}
+
+function checkEnemyHit(p){
+    Object.keys(enemies).forEach((key) => {
+        if(p['direction'] == "right"){
+            console.log("RIGHT HIT")
+            if(p.x + 1 == enemies[key].x){
+                firebase.database().ref(`enemies/${enemies[key].id}`).update({
+                    health: enemies[key]['health'] - 30
+                })
+                playerRef.update({
+                    mana: p.mana - 5
+                })
+            }
+        }else{
+            if(p.x - 1 == enemies[key].x){
+                firebase.database().ref(`enemies/${enemies[key].id}`).update({
+                    health: enemies[key]['health'] - 30
+                })
+
+                playerRef.update({
+                    mana: p.mana - 5,
+                    coins: player.coins + 3
+                })
+            }
+        }
+    })
+}
+
+function newEnemy(){
+    console.log("HEAV")
+    if(players[playerId].map == "Castle"){
+        playerRef.update({
+            coins: players[playerId].coins + 1
+        })
+    }
+    if (playersArr.some(e => players[e].map == "Castle")) {
+
+        if(Object.keys(enemies).length == 0){
+            document.querySelector(".chat").innerHTML += `<p><b class="alert">Slimes have entered the castle starting raid</b></p>`
+        }
+        if(Object.keys(enemies).length <= 20){
+            const uid = Date.now() + "uid"
+            spawnEnemy(uid)
+        }
+     }
+     else{
+        if(Object.keys(enemies).length > 0){
+            document.querySelector(".chat").innerHTML += `<p><b class="alert">No slimes at castle ending raid</b></p>`
+        }
+
+        Object.keys(enemies).forEach(key => {
+            allEnemiesRef.remove()
+        })
+     }
 }

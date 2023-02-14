@@ -4,7 +4,7 @@ var playersArr = []
 var playerRef
 var players = {}
 var cooldown = true
-
+var serverId
 
 const allPlayersRef = firebase.database().ref(`players`)   
 allPlayersRef.on("child_added", (snapshot) => {
@@ -78,6 +78,10 @@ allPlayersRef.on("child_added", (snapshot) => {
 
     // remvoe player on leave
     allPlayersRef.on("child_removed", (snapshot) => {
+        if(snapshot.val().id == serverId){
+            removeClock("mArmy", true)
+            removeClock("sArmy", true)
+        }
         const removeKey = snapshot.val().id
         gameContainer.removeChild(playerElements[removeKey])
         playersArr.splice(playersArr.indexOf(removeKey), 1)
@@ -87,10 +91,26 @@ allPlayersRef.on("child_added", (snapshot) => {
     allPlayersRef.on("value", (snapshot) => {
     //Fires when a change occures
     players = snapshot.val() || {}
+    console.log("SERVER: " +  Object.keys(players)[0])
+    serverId = Object.keys(players)[0]
+    if(serverId == playerId){
+        if(!isClock("mArmy")){
+            startClock(moveArmy, 1000, "mArmy", true)
+        }
+        if(!isClock("sArmy")){
+            startClock(newEnemy, 1000, "sArmy", true)
+        }
+    }
     Object.keys(players).forEach((key) => {
         const characterState = players[key]
         let el = playerElements[key]
         const sword = el.querySelector(".sword")
+
+        // running through enemy
+        if (enemiesArr.some(e => enemies[e].x === characterState.x && enemies[e].y === characterState.y && enemies[e].map === characterState.map)) {
+            characterState.health -= 10
+         }
+
         // update DOM
         el.querySelector(".Character_name").innerText = characterState.name
         el.querySelector(".Character_coins").innerText = characterState.coins
@@ -102,9 +122,12 @@ allPlayersRef.on("child_added", (snapshot) => {
         const top = 16 * characterState.y - 4 + "px"
         el.style.transform = `translate3d(${left}, ${top}, 0)`
         Bars = el.querySelectorAll("#myBar")
+
         Bars[0].style.width = `${characterState.health}%`
         Bars[1].style.width = `${characterState.mana}%`
         Bars[1].style.backgroundColor = `blue`
+
+
         if(characterState.states.includes("slash")){
             sword.classList.add("slash")
         }else{
@@ -168,6 +191,8 @@ function click(e){
             states: res
         })
 
+        checkEnemyHit(players[playerId])
+
         playerElements[playerId].querySelector(".sword").addEventListener("animationend", () => {
             let res = players[playerId].states
             if(res.indexOf("slash") > -1){
@@ -187,13 +212,13 @@ function playerDie(){
     playerRef.update({
         id: playerId,
         direction: "right",
-        color: randomFromArray(playerColors),
         x,
         y,
         coins: 0,
         mana: 0,
         health: 100,
         collide: false,
+        map: "map"
 
     })
     Dwn.unbind()

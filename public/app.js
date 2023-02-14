@@ -56,10 +56,7 @@
     }
 
     function initGame() {
-        spawnEnemy("bKnight1");
-        spawnEnemy("bKnight2");
-        spawnEnemy("bKnight3");
-        spawnEnemy("bKnight4");
+
         Up = new KeyPressListener("KeyW", () => handleArrowPress(0, -1))
         Dwn = new KeyPressListener("KeyS", () => handleArrowPress(0, 1))
         Lft = new KeyPressListener("KeyA", () => handleArrowPress(-1, 0))
@@ -105,7 +102,7 @@
 
 
         function popup(){
-            if(localStorage.getItem('logged') != 'no'){
+            if(localStorage.getItem('loggedCastle') != 'no'){
                 openModal()
             }
         }
@@ -115,7 +112,7 @@
         loadMessages()
         makeBoss()
         popup()
-        startClock(moveArmy, 1000)
+
     }
 
 
