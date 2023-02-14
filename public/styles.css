@@ -125,7 +125,7 @@ button:active {
     background-position-y: -95px;
 }
 
-.Character[data-color="dark"] .Character_sprite{
+.Character[data-color="pink"] .Character_sprite{
     background-position-y: -111px;
 }
 
