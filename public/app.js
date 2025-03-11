@@ -130,7 +130,7 @@
                 id: playerId,
                 name,
                 direction: "right",
-                color: randomFromArray(playerColors),
+                color: randomFromArray(player ),
                 x,
                 y,
                 coins: 0,
